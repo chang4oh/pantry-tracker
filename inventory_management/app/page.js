@@ -160,6 +160,9 @@ export default function Home() {
               <Typography variant={'h3'} color={'#333'} textAlign={'center'}>
                 Quantity: {quantity}
               </Typography>
+              <Button variant="contained" onClick={() => addItem(name)}>
+                Add
+              </Button>
               <Button variant="contained" onClick={() => removeItem(name)}>
                 Remove
               </Button>
