@@ -9,7 +9,7 @@ import {
   Stack,
   TextField,
   Button,
-  ThemeProvider,
+  Grid,
 } from "@mui/material";
 import {
   collection,
@@ -131,9 +131,9 @@ export default function Home() {
           </Stack>
         </Box>
       </Modal>
-      <Box border={'1px solid #333'}>
+      <Box border={'1px solid #333'} width="1000px">
         <Box
-          width="800px"
+          width="100%"
           height="100px"
           bgcolor={'#ADD8E6'}
           display={'flex'}
@@ -144,31 +144,30 @@ export default function Home() {
             Inventory Items
           </Typography>
         </Box>
-        <Stack width="800px" height="300px" spacing={2} overflow={'auto'}>
+        <Stack width="100%" height="500px" spacing={2} overflow={'auto'} padding={2}>
           {filteredInventory.map(({ name, quantity }) => (
-            <Box
-              key={name}
-              width="100%"
-              minHeight="150px"
-              display={'flex'}
-              justifyContent={'space-between'}
-              alignItems={'center'}
-              bgcolor={'#f0f0f0'}
-              paddingX={5}
-            >
-              <Typography variant={'h3'} color={'#333'} textAlign={'center'}>
-                {name.charAt(0).toUpperCase() + name.slice(1)}
-              </Typography>
-              <Typography variant={'h3'} color={'#333'} textAlign={'center'}>
-                Quantity: {quantity}
-              </Typography>
-              <Button variant="contained" onClick={() => addItem(name)}>
-                Add
-              </Button>
-              <Button variant="contained" onClick={() => removeItem(name)}>
-                Remove
-              </Button>
-            </Box>
+            <Grid container key={name} spacing={2} alignItems="center" paddingX={5}>
+              <Grid item xs={4}>
+                <Typography variant={'h5'} color={'#333'}>
+                  {name.charAt(0).toUpperCase() + name.slice(1)}
+                </Typography>
+              </Grid>
+              <Grid item xs={2}>
+                <Typography variant={'h5'} color={'#333'}>
+                  Quantity: {quantity}
+                </Typography>
+              </Grid>
+              <Grid item xs={3}>
+                <Button variant="contained" onClick={() => addItem(name)} fullWidth>
+                  Add
+                </Button>
+              </Grid>
+              <Grid item xs={3}>
+                <Button variant="contained" onClick={() => removeItem(name)} fullWidth>
+                  Remove
+                </Button>
+              </Grid>
+            </Grid>
           ))}
         </Stack>
         <Stack direction="row" spacing={2} padding={2}>
