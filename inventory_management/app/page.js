@@ -26,13 +26,13 @@ import {
 // Create a custom theme with Roboto font
 const theme = createTheme({
   typography: {
-    fontFamily: 'Roboto, Arial, sans-serif',
+    fontFamily: "Roboto, Arial, sans-serif",
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          textTransform: 'none',
+          textTransform: "none",
         },
       },
     },
@@ -44,7 +44,7 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: '90%',
+  width: "90%",
   maxWidth: 400,
   bgcolor: "white",
   border: "2px solid #000",
@@ -53,17 +53,17 @@ const style = {
   display: "flex",
   flexDirection: "column",
   gap: 3,
-  borderRadius: '15px', // Rounded corners
+  borderRadius: "15px", // Rounded corners
 };
 
 export default function Home() {
   const [inventory, setInventory] = useState([]);
   const [open, setOpen] = useState(false);
-  const [itemName, setItemName] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [itemName, setItemName] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const updateInventory = async () => {
-    const snapshot = query(collection(firestore, 'inventory'));
+    const snapshot = query(collection(firestore, "inventory"));
     const docs = await getDocs(snapshot);
     const inventoryList = [];
     docs.forEach((doc) => {
@@ -77,7 +77,7 @@ export default function Home() {
   }, []);
 
   const addItem = async (item) => {
-    const docRef = doc(collection(firestore, 'inventory'), item);
+    const docRef = doc(collection(firestore, "inventory"), item);
     const docSnap = await getDoc(docRef);
     const now = new Date();
 
@@ -91,7 +91,7 @@ export default function Home() {
   };
 
   const removeItem = async (item) => {
-    const docRef = doc(collection(firestore, 'inventory'), item);
+    const docRef = doc(collection(firestore, "inventory"), item);
     const docSnap = await getDoc(docRef);
     const now = new Date();
 
@@ -109,7 +109,7 @@ export default function Home() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const filteredInventory = inventory.filter(item =>
+  const filteredInventory = inventory.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -118,16 +118,16 @@ export default function Home() {
       <Box
         width="100vw"
         height="100vh"
-        display={'flex'}
-        justifyContent={'center'}
-        flexDirection={'column'}
-        alignItems={'center'}
+        display={"flex"}
+        justifyContent={"center"}
+        flexDirection={"column"}
+        alignItems={"center"}
         gap={2}
-        sx={{ 
-          backgroundImage: 'url(/path-to-your-background-image.jpg)', 
-          backgroundSize: 'cover',
-          backgroundRepeat: 'no-repeat',
-          p: 2
+        sx={{
+          backgroundImage: "url(/path-to-your-background-image.jpg)",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+          p: 2,
         }}
       >
         <Modal
@@ -140,7 +140,7 @@ export default function Home() {
             <Typography id="modal-modal-title" variant="h6" component="h2">
               Add Item
             </Typography>
-            <Stack width="100%" direction={'row'} spacing={2}>
+            <Stack width="100%" direction={"row"} spacing={2}>
               <TextField
                 id="outlined-basic"
                 label="Item"
@@ -153,7 +153,7 @@ export default function Home() {
                 variant="outlined"
                 onClick={() => {
                   addItem(itemName);
-                  setItemName('');
+                  setItemName("");
                   handleClose();
                 }}
               >
@@ -162,36 +162,43 @@ export default function Home() {
             </Stack>
           </Box>
         </Modal>
-        <Box 
-          border={'1px solid #333'} 
-          width="100%" 
+        <Box
+          border={"1px solid #333"}
+          width="100%"
           maxWidth="1000px"
           borderRadius="15px"
           sx={{
-            bgcolor: 'white',
+            bgcolor: "white",
             boxShadow: 3,
-            p: 2
+            p: 2,
           }}
         >
           <Box
             width="100%"
             height="100px"
-            bgcolor={'#ADD8E6'}
-            display={'flex'}
-            justifyContent={'center'}
-            alignItems={'center'}
+            bgcolor={"#ADD8E6"}
+            display={"flex"}
+            justifyContent={"center"}
+            alignItems={"center"}
             borderRadius="15px 15px 0 0"
           >
-            <Typography variant={'h2'} color={'#333'} textAlign={'center'}>
-              Inventory Items
+            <Typography variant={"h2"} color={"#333"} textAlign={"center"}>
+              Pantry List
             </Typography>
           </Box>
           <Stack width="100%" spacing={2} padding={2}>
             {/* Header Row */}
-            <Grid container spacing={1} paddingX={2} alignItems="center" bgcolor="#e0e0e0" borderRadius="15px">
+            <Grid
+              container
+              spacing={1}
+              paddingX={2}
+              alignItems="center"
+              bgcolor="#e0e0e0"
+              borderRadius="15px"
+            >
               <Grid item xs={4} sm={3} md={2}>
                 <Typography variant="h6" color="#333" fontWeight="bold">
-                  Product
+                  Item
                 </Typography>
               </Grid>
               <Grid item xs={4} sm={3} md={2}>
@@ -201,41 +208,61 @@ export default function Home() {
               </Grid>
               <Grid item xs={4} sm={6} md={4}>
                 <Typography variant="h6" color="#333" fontWeight="bold">
-                  Last Modified
+                  Date
                 </Typography>
               </Grid>
               <Grid item xs={4} sm={6} md={2}>
-                <Typography variant="h6" color="#333" fontWeight="bold">
-                  Actions
-                </Typography>
+                <Typography
+                  variant="h6"
+                  color="#333"
+                  fontWeight="bold"
+                ></Typography>
               </Grid>
             </Grid>
 
             {/* Item Rows */}
-            <Stack height="500px" spacing={2} overflow={'auto'}>
+            <Stack height="500px" spacing={2} overflow={"auto"}>
               {filteredInventory.map(({ name, quantity, lastModified }) => (
-                <Grid container key={name} spacing={1} alignItems="center" paddingX={2}>
+                <Grid
+                  container
+                  key={name}
+                  spacing={1}
+                  alignItems="center"
+                  paddingX={2}
+                >
                   <Grid item xs={4} sm={3} md={2}>
-                    <Typography variant={'h5'} color={'#333'}>
+                    <Typography variant={"h5"} color={"#333"}>
                       {name.charAt(0).toUpperCase() + name.slice(1)}
                     </Typography>
                   </Grid>
                   <Grid item xs={4} sm={3} md={2}>
-                    <Typography variant={'h5'} color={'#333'}>
+                    <Typography variant={"h5"} color={"#333"}>
                       {quantity}
                     </Typography>
                   </Grid>
                   <Grid item xs={4} sm={6} md={4}>
-                    <Typography variant={'h5'} color={'#333'}>
-                      {lastModified ? new Date(lastModified.seconds * 1000).toLocaleDateString() : 'N/A'}
+                    <Typography variant={"h5"} color={"#333"}>
+                      {lastModified
+                        ? new Date(
+                            lastModified.seconds * 1000
+                          ).toLocaleDateString()
+                        : "N/A"}
                     </Typography>
                   </Grid>
                   <Grid item xs={4} sm={6} md={2}>
                     <Stack direction="row" spacing={1}>
-                      <Button variant="contained" onClick={() => addItem(name)} fullWidth>
+                      <Button
+                        variant="contained"
+                        onClick={() => addItem(name)}
+                        sx={{ width: "120px", height: "40px" }} // Fixed width and height
+                      >
                         Add
                       </Button>
-                      <Button variant="contained" onClick={() => removeItem(name)} fullWidth>
+                      <Button
+                        variant="contained"
+                        onClick={() => removeItem(name)}
+                        sx={{ width: "120px", height: "40px" }} // Fixed width and height
+                      >
                         Remove
                       </Button>
                     </Stack>
@@ -246,14 +273,18 @@ export default function Home() {
           </Stack>
           <Stack direction="row" spacing={2} padding={2} flexWrap="wrap">
             <TextField
-              label="Search Inventory"
+              label="Search Pantry"
               variant="outlined"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               fullWidth
-              sx={{ maxWidth: '300px' }}
+              sx={{ maxWidth: "300px" }}
             />
-            <Button variant="contained" onClick={handleOpen} sx={{ flexShrink: 0 }}>
+            <Button
+              variant="contained"
+              onClick={handleOpen}
+              sx={{ flexShrink: 0 }}
+            >
               Add New Item
             </Button>
           </Stack>
