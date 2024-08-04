@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useState, useEffect } from "react";
 import { firestore } from "../firebase";
 import {
@@ -10,6 +9,8 @@ import {
   TextField,
   Button,
   Grid,
+  ThemeProvider,
+  createTheme
 } from "@mui/material";
 import {
   collection,
@@ -20,6 +21,22 @@ import {
   query,
   getDoc,
 } from "firebase/firestore";
+
+// Create a custom theme with Roboto font
+const theme = createTheme({
+  typography: {
+    fontFamily: 'cursive , Arial, sans-serif',
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none', // Preserve button text case
+        },
+      },
+    },
+  },
+});
 
 const style = {
   position: "absolute",
@@ -59,11 +76,13 @@ export default function Home() {
   const addItem = async (item) => {
     const docRef = doc(collection(firestore, 'inventory'), item);
     const docSnap = await getDoc(docRef);
+    const now = new Date();
+
     if (docSnap.exists()) {
-      const { quantity } = docSnap.data();
-      await setDoc(docRef, { quantity: quantity + 1 });
+      const { quantity, lastModified } = docSnap.data();
+      await setDoc(docRef, { quantity: quantity + 1, lastModified: now });
     } else {
-      await setDoc(docRef, { quantity: 1 });
+      await setDoc(docRef, { quantity: 1, lastModified: now });
     }
     await updateInventory();
   };
@@ -71,12 +90,14 @@ export default function Home() {
   const removeItem = async (item) => {
     const docRef = doc(collection(firestore, 'inventory'), item);
     const docSnap = await getDoc(docRef);
+    const now = new Date();
+
     if (docSnap.exists()) {
       const { quantity } = docSnap.data();
       if (quantity === 1) {
         await deleteDoc(docRef);
       } else {
-        await setDoc(docRef, { quantity: quantity - 1 });
+        await setDoc(docRef, { quantity: quantity - 1, lastModified: now });
       }
     }
     await updateInventory();
@@ -90,98 +111,132 @@ export default function Home() {
   );
 
   return (
-    <Box
-      width="100vw"
-      height="100vh"
-      display={'flex'}
-      justifyContent={'center'}
-      flexDirection={'column'}
-      alignItems={'center'}
-      gap={2}
-    >
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
+    <ThemeProvider theme={theme}>
+      <Box
+        width="100vw"
+        height="100vh"
+        display={'flex'}
+        justifyContent={'center'}
+        flexDirection={'column'}
+        alignItems={'center'}
+        gap={2}
+        sx={{ 
+          backgroundImage: 'url(/path-to-your-background-image.jpg)', 
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat'
+        }}
       >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Add Item
-          </Typography>
-          <Stack width="100%" direction={'row'} spacing={2}>
-            <TextField
-              id="outlined-basic"
-              label="Item"
-              variant="outlined"
-              fullWidth
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
-            />
-            <Button
-              variant="outlined"
-              onClick={() => {
-                addItem(itemName);
-                setItemName('');
-                handleClose();
-              }}
-            >
-              Add
-            </Button>
-          </Stack>
-        </Box>
-      </Modal>
-      <Box border={'1px solid #333'} width="1000px">
-        <Box
-          width="100%"
-          height="100px"
-          bgcolor={'#ADD8E6'}
-          display={'flex'}
-          justifyContent={'center'}
-          alignItems={'center'}
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
         >
-          <Typography variant={'h2'} color={'#333'} textAlign={'center'}>
-            Inventory Items
-          </Typography>
-        </Box>
-        <Stack width="100%" height="500px" spacing={2} overflow={'auto'} padding={2}>
-          {filteredInventory.map(({ name, quantity }) => (
-            <Grid container key={name} spacing={2} alignItems="center" paddingX={5}>
-              <Grid item xs={4}>
-                <Typography variant={'h5'} color={'#333'}>
-                  {name.charAt(0).toUpperCase() + name.slice(1)}
+          <Box sx={style}>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              Add Item
+            </Typography>
+            <Stack width="100%" direction={'row'} spacing={2}>
+              <TextField
+                id="outlined-basic"
+                label="Item"
+                variant="outlined"
+                fullWidth
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+              />
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  addItem(itemName);
+                  setItemName('');
+                  handleClose();
+                }}
+              >
+                Add
+              </Button>
+            </Stack>
+          </Box>
+        </Modal>
+        <Box border={'1px solid #333'} width="1000px">
+          <Box
+            width="100%"
+            height="100px"
+            bgcolor={'#ADD8E6'}
+            display={'flex'}
+            justifyContent={'center'}
+            alignItems={'center'}
+          >
+            <Typography variant={'h2'} color={'#333'} textAlign={'center'}>
+              Inventory Items
+            </Typography>
+          </Box>
+          <Stack width="100%" spacing={2} padding={2}>
+            {/* Header Row */}
+            <Grid container spacing={1} paddingX={2} alignItems="center" bgcolor="#e0e0e0">
+              <Grid item xs={2}>
+                <Typography variant="h6" color="#333" fontWeight="bold">
+                  Product
                 </Typography>
               </Grid>
               <Grid item xs={2}>
-                <Typography variant={'h5'} color={'#333'}>
-                  Quantity: {quantity}
+                <Typography variant="h6" color="#333" fontWeight="bold">
+                  Quantity
                 </Typography>
               </Grid>
-              <Grid item xs={3}>
-                <Button variant="contained" onClick={() => addItem(name)} fullWidth>
-                  Add
-                </Button>
-              </Grid>
-              <Grid item xs={3}>
-                <Button variant="contained" onClick={() => removeItem(name)} fullWidth>
-                  Remove
-                </Button>
+              <Grid item xs={4}>
+                <Typography variant="h6" color="#333" fontWeight="bold">
+                  Last Modified
+                </Typography>
               </Grid>
             </Grid>
-          ))}
-        </Stack>
-        <Stack direction="row" spacing={2} padding={2}>
-          <TextField
-            label="Search Inventory"
-            variant="outlined"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <Button variant="contained" onClick={handleOpen}>
-            Add New Item
-          </Button>
-        </Stack>
+
+            {/* Item Rows */}
+            <Stack height="500px" spacing={2} overflow={'auto'}>
+              {filteredInventory.map(({ name, quantity, lastModified }) => (
+                <Grid container key={name} spacing={1} alignItems="center" paddingX={2}>
+                  <Grid item xs={2}>
+                    <Typography variant={'h5'} color={'#333'}>
+                      {name.charAt(0).toUpperCase() + name.slice(1)}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={2}>
+                    <Typography variant={'h5'} color={'#333'}>
+                      {quantity}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Typography variant={'h5'} color={'#333'}>
+                      {lastModified ? new Date(lastModified.seconds * 1000).toLocaleDateString() : 'N/A'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <Button variant="contained" onClick={() => addItem(name)} fullWidth>
+                      Add
+                    </Button>
+                  </Grid>
+                  <Grid item xs={1}>
+                    <Button variant="contained" onClick={() => removeItem(name)} fullWidth>
+                      Remove
+                    </Button>
+                  </Grid>
+                </Grid>
+              ))}
+            </Stack>
+          </Stack>
+          <Stack direction="row" spacing={2} padding={2}>
+            <TextField
+              label="Search Inventory"
+              variant="outlined"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Button variant="contained" onClick={handleOpen}>
+              Add New Item
+            </Button>
+          </Stack>
+        </Box>
       </Box>
-    </Box>
+    </ThemeProvider>
   );
 }
