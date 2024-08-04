@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { firestore } from "../firebase";
 import {
@@ -22,40 +23,40 @@ import {
   getDoc,
 } from "firebase/firestore";
 
-// Create a custom theme with Roboto font
-const theme = createTheme({
-  typography: {
-    fontFamily: "Roboto, Arial, sans-serif",
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: "none",
+export default function Home() {
+  // Create a custom theme with Roboto font
+  const theme = createTheme({
+    typography: {
+      fontFamily: "Roboto, Arial, sans-serif",
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+          },
         },
       },
     },
-  },
-});
+  });
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "90%",
-  maxWidth: 400,
-  bgcolor: "white",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-  display: "flex",
-  flexDirection: "column",
-  gap: 3,
-  borderRadius: "15px", // Rounded corners
-};
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "90%",
+    maxWidth: 400,
+    bgcolor: "white",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 4,
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+    borderRadius: "15px", // Rounded corners
+  };
 
-export default function Home() {
   const [inventory, setInventory] = useState([]);
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
