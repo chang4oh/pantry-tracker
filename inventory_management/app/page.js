@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { firestore } from "../firebase";
 import {
   Box,
@@ -12,6 +12,10 @@ import {
   Grid,
   ThemeProvider,
   createTheme,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import {
   collection,
@@ -22,9 +26,11 @@ import {
   query,
   getDoc,
 } from "firebase/firestore";
+import Webcam from "react-webcam";
+import { BrowserMultiFormatReader } from "@zxing/library";
+import axios from "axios";
 
 export default function Home() {
-  // Create a custom theme with Roboto font
   const theme = createTheme({
     typography: {
       fontFamily: "Roboto, Arial, sans-serif",
@@ -54,13 +60,18 @@ export default function Home() {
     display: "flex",
     flexDirection: "column",
     gap: 3,
-    borderRadius: "15px", // Rounded corners
+    borderRadius: "15px", 
   };
 
   const [inventory, setInventory] = useState([]);
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOption, setSortOption] = useState("name");
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [recipes, setRecipes] = useState([]);
+  const webcamRef = useRef(null);
+  const barcodeReader = new BrowserMultiFormatReader();
 
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, "inventory"));
@@ -108,10 +119,58 @@ export default function Home() {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const handleScannerOpen = () => setScannerOpen(true);
+  const handleScannerClose = () => setScannerOpen(false);
 
-  const filteredInventory = inventory.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleBarcodeScan = () => {
+    if (webcamRef.current) {
+      barcodeReader.decodeFromVideoDevice(
+        null,
+        webcamRef.current.video,
+        (result, err) => {
+          if (result) {
+            addItem(result.text);
+            setScannerOpen(false);
+          }
+        }
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (scannerOpen) {
+      handleBarcodeScan();
+    } else {
+      barcodeReader.reset();
+    }
+  }, [scannerOpen]);
+
+  const fetchRecipes = async () => {
+    const items = inventory.map(item => item.name).join(", ");
+    try {
+      const response = await axios.post("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", {
+        ingredients: items,
+      });
+      setRecipes(response.data.recipes);
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+    }
+  };
+
+  const filteredInventory = inventory
+    .filter((item) =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortOption === "name") {
+        return a.name.localeCompare(b.name);
+      } else if (sortOption === "quantity") {
+        return b.quantity - a.quantity;
+      } else if (sortOption === "date") {
+        return new Date(b.lastModified.seconds * 1000) - new Date(a.lastModified.seconds * 1000);
+      }
+      return 0;
+    });
 
   return (
     <ThemeProvider theme={theme}>
@@ -124,9 +183,9 @@ export default function Home() {
         alignItems={"center"}
         gap={2}
         sx={{
-          backgroundImage: "url(/path-to-your-background-image.jpg)",
+          backgroundImage: "url(inventory_management/img/background.png)",
           backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
+          backgroundRepeat: "repeat",
           p: 2,
         }}
       >
@@ -187,7 +246,6 @@ export default function Home() {
             </Typography>
           </Box>
           <Stack width="100%" spacing={2} padding={2}>
-            {/* Header Row */}
             <Grid
               container
               spacing={1}
@@ -220,7 +278,6 @@ export default function Home() {
               </Grid>
             </Grid>
 
-            {/* Item Rows */}
             <Stack height="500px" spacing={2} overflow={"auto"}>
               {filteredInventory.map(({ name, quantity, lastModified }) => (
                 <Grid
@@ -254,14 +311,14 @@ export default function Home() {
                       <Button
                         variant="contained"
                         onClick={() => addItem(name)}
-                        sx={{ width: "120px", height: "40px" }} // Fixed width and height
+                        sx={{ width: "120px", height: "40px" }} 
                       >
                         Add
                       </Button>
                       <Button
                         variant="contained"
                         onClick={() => removeItem(name)}
-                        sx={{ width: "120px", height: "40px" }} // Fixed width and height
+                        sx={{ width: "120px", height: "40px" }} 
                       >
                         Remove
                       </Button>
@@ -280,6 +337,18 @@ export default function Home() {
               fullWidth
               sx={{ maxWidth: "300px" }}
             />
+            <FormControl variant="outlined" sx={{ minWidth: 120 }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                label="Sort By"
+              >
+                <MenuItem value="name">Name</MenuItem>
+                <MenuItem value="quantity">Quantity</MenuItem>
+                <MenuItem value="date">Date</MenuItem>
+              </Select>
+            </FormControl>
             <Button
               variant="contained"
               onClick={handleOpen}
@@ -287,8 +356,50 @@ export default function Home() {
             >
               Add New Item
             </Button>
+            <Button
+              variant="outlined"
+              onClick={handleScannerOpen}
+              sx={{ flexShrink: 0 }}
+            >
+              Scan Barcode
+            </Button>
+          </Stack>
+          <Stack padding={2}>
+            <Button
+              variant="contained"
+              onClick={fetchRecipes}
+              sx={{ flexShrink: 0 }}
+            >
+              Generate Recipes
+            </Button>
+            <Stack spacing={2}>
+              {recipes.map((recipe, index) => (
+                <Box key={index} p={2} border={"1px solid #ccc"}>
+                  <Typography variant="h6">{recipe.title}</Typography>
+                  <Typography>{recipe.description}</Typography>
+                </Box>
+              ))}
+            </Stack>
           </Stack>
         </Box>
+
+        <Modal
+          open={scannerOpen}
+          onClose={handleScannerClose}
+          aria-labelledby="scanner-modal-title"
+          aria-describedby="scanner-modal-description"
+        >
+          <Box sx={style}>
+            <Typography id="scanner-modal-title" variant="h6" component="h2">
+              Scan Barcode
+            </Typography>
+            <Webcam
+              ref={webcamRef}
+              audio={false}
+              style={{ width: "100%" }}
+            />
+          </Box>
+        </Modal>
       </Box>
     </ThemeProvider>
   );
