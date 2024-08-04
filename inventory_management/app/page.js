@@ -23,8 +23,6 @@ import {
   getDoc,
 } from "firebase/firestore";
 
-
-
 export default function Home() {
   // Create a custom theme with Roboto font
   const theme = createTheme({
