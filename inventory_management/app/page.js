@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { firestore } from "../firebase";
+import { getAnalytics } from "firebase/analytics";
 import {
   Box,
   Modal,
